@@ -1,0 +1,9 @@
+c:\users\sofkin\documents\visual studio 2015\Projects\KENKENNN\KENKENNN\bin\Debug\KENKENNN.exe.config
+c:\users\sofkin\documents\visual studio 2015\Projects\KENKENNN\KENKENNN\bin\Debug\KENKENNN.exe
+c:\users\sofkin\documents\visual studio 2015\Projects\KENKENNN\KENKENNN\bin\Debug\KENKENNN.pdb
+c:\users\sofkin\documents\visual studio 2015\Projects\KENKENNN\KENKENNN\obj\Debug\KENKENNN.csprojResolveAssemblyReference.cache
+c:\users\sofkin\documents\visual studio 2015\Projects\KENKENNN\KENKENNN\obj\Debug\KENKENNN.Form1.resources
+c:\users\sofkin\documents\visual studio 2015\Projects\KENKENNN\KENKENNN\obj\Debug\KENKENNN.Properties.Resources.resources
+c:\users\sofkin\documents\visual studio 2015\Projects\KENKENNN\KENKENNN\obj\Debug\KENKENNN.csproj.GenerateResource.Cache
+c:\users\sofkin\documents\visual studio 2015\Projects\KENKENNN\KENKENNN\obj\Debug\KENKENNN.exe
+c:\users\sofkin\documents\visual studio 2015\Projects\KENKENNN\KENKENNN\obj\Debug\KENKENNN.pdb
