@@ -8,9 +8,11 @@ build
 
 .DS_Store
 
-**/**/**/bin/*
-**/bin/*
-bin/*
+KENKENNN/KENKENNN/bin
+KENKENNN/KENKENNN/obj
+
+bin
+obj
 
 **/obj
 obj
@@ -39,3 +41,4 @@ xcuserdata
 #!packages/repositories.config
 
 .vs/
+*.resx
