@@ -7,7 +7,8 @@
             Add = 1,
             Sub,
             Mul,
-            Div
+            Div,
+            Const
         }
     }
 }

@@ -17,6 +17,7 @@ using System.Windows.Forms;
 using System.IO;
 using static KENKENNN.EnumUtils;
 using static KENKENNN.Constants;
+using System.Linq;
 
 namespace KENKENNN
 {
@@ -31,11 +32,10 @@ namespace KENKENNN
 
         // Создем массив, в который будем хранить информацию о том
         // Задействованы ли клеточки в областях
-        private int[,] map;
+        private int[,] map = new int[MapSize, MapSize];
         // Создаем массив с ответами
-        private int[,] correct;
-
-        private List<Region> regions = new List<Region>();
+        private int[,] correct = new int[MapSize, MapSize];
+        private Problem problem;
         #endregion
 
         #region Construction
@@ -44,6 +44,27 @@ namespace KENKENNN
         /// </summary>
         public GameField()
         {
+            #region To remove
+            //var r = new Region();
+            //r.RegionValue = 2;
+            //r.Operation = Operator.Sub;
+            //r.Cells.Add(new Cell(0, 0));
+            //r.Cells.Add(new Cell(0, 0));
+            //r.Cells.Add(new Cell(0, 0));
+
+            //try
+            //{
+            //    r.FindCandidates();
+
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine(e.Message); ;
+            //}
+
+            //return;
+            #endregion
+            problem = new Problem();
             InitializeComponent();
             InitializeBoard();
         }
@@ -52,10 +73,6 @@ namespace KENKENNN
         #region Auxiliary methods
         private void InitializeBoard()
         {
-            // инициализация массива для областей
-            correct = new int[MapSize, MapSize];
-            map = new int[MapSize, MapSize];
-
             for (int i = 0; i < MapSize; i++)
             {
                 for (int j = 0; j < MapSize; j++)
@@ -65,7 +82,7 @@ namespace KENKENNN
             }
 
             // Открытие и прочтение файла, на основе которого генерируется игра
-            var lines = File.ReadAllLines(@"..\123.txt");
+            var lines = File.ReadAllLines(@"../../Data/PuzzleData.txt");
             var cells = new string[lines.Length][];
 
             for (int i = 0; i < cells.Length; i++)
@@ -128,7 +145,6 @@ namespace KENKENNN
                 for (int j = 0; j < MapSize; j++)
                 {
                     var cellColor = RegionColors[regionsCount];
-                    var region = new Region();
                     var cell = new Cell(i, j);
                     Cell neighbourCcell1 = null, neighbourCell2 = null;
 
@@ -138,8 +154,6 @@ namespace KENKENNN
                     // Если клетка не относится ни к одной из областей
                     if (CellIsFree(cell))
                     {
-                        region.Cells.Add(cell);
-                        
                         // Красим клетку в цвет, соответствующий региону
                         textCell[i][j].BackColor = cellColor;
                         OccupyCell(cell);
@@ -147,10 +161,9 @@ namespace KENKENNN
                         // Если клетка не на границе & клетка рядом свободна
                         if (i < MapSize - 1)
                         {
-                            neighbourCcell1 = new Cell(i + 1, j);
-                            if (CellIsFree(neighbourCcell1))
+                            if (CellIsFree(i + 1, j))
                             {
-                                region.Cells.Add(neighbourCcell1);
+                                neighbourCcell1 = new Cell(i + 1, j);
 
                                 // Помечаем значение соседней клетки, записываем туда 
                                 // Правильный ответ в этой клетке
@@ -165,10 +178,9 @@ namespace KENKENNN
                         // Если клетка не на границе & клетка рядом свободна
                         if (j < MapSize - 1)
                         {
-                            neighbourCell2 = new Cell(i, j + 1);
-                            if (CellIsFree(neighbourCell2))
+                            if (CellIsFree(i, j + 1))
                             {
-                                region.Cells.Add(neighbourCell2);
+                                neighbourCell2 = new Cell(i, j + 1);
 
                                 // Помечаем значение соседней клетки, записываем туда 
                                 // Правильный ответ в этой клетке
@@ -181,7 +193,7 @@ namespace KENKENNN
                         }
 
                         //Создание правила для сформированной области
-                        MakeRule(cell, neighbourCcell1, neighbourCell2, region);
+                        MakeRule(cell, neighbourCcell1, neighbourCell2);
                         regionsCount++;
                     }
                 }
@@ -190,16 +202,20 @@ namespace KENKENNN
 
         // Создание правила для области игрового поля
         // Сюда передаются значения основной и соседних клеточек, а так же их индексы
-        private void MakeRule(Cell primaryCell, Cell neighbourCell1, Cell neighbourCell2, Region region)
+        private void MakeRule(Cell primaryCell, Cell neighbourCell1, Cell neighbourCell2)
         {
-            // Рандомизатор целых чисел, выдает число от 1 до 4х
+            // Рандомизатор целых чисел, выдает число от 1 до 3х
             var regionOperation = (Operator)randomGenerator.Next((int)Operator.Add, (int)Operator.Div);
             var operationValue = string.Empty;
             var regionValue = primaryCell.Answer;
 
             // Если область состоит только из одной клеточки, то заполняем 
             // ее числом из ответа, как указано в правилах игры
-            if (!CellIsFree(neighbourCell1) || !CellIsFree(neighbourCell2))
+            if (CellIsFree(neighbourCell1) && CellIsFree(neighbourCell2))
+            {
+                regionOperation = Operator.Const;
+            }
+            else
             {
                 switch (regionOperation)
                 {
@@ -222,19 +238,31 @@ namespace KENKENNN
                         break;
                     case Operator.Sub:
                         operationValue = "(-)";
+                        int max, sum;
                         // Если рандомизатор выдает число 2, то правило для области - вычитание
                         if (CellIsFree(neighbourCell1))
                         {
-                            regionValue -= neighbourCell2.Answer;
+                            sum = primaryCell.Answer + neighbourCell2.Answer;
+                            max = Math.Max(primaryCell.Answer, neighbourCell2.Answer);
+                            regionValue = max - (sum - max);
                         }
                         else if (CellIsFree(neighbourCell2))
                         {
-                            regionValue -= neighbourCell1.Answer;
+                            sum = primaryCell.Answer + neighbourCell1.Answer;
+                            max = Math.Max(primaryCell.Answer, neighbourCell1.Answer);
+                            regionValue = max - (sum - max);
                         }
                         else
                         {
-                            regionValue -=
-                                (neighbourCell1.Answer + neighbourCell2.Answer);
+                            sum = primaryCell.Answer + neighbourCell1.Answer + neighbourCell2.Answer;
+                            //max = Math.Max(primaryCell.Answer, Math.Max(neighbourCell1.Answer, neighbourCell2.Answer));
+                            //regionValue = max - (sum - max);
+                            //if (regionValue < 0)
+                            {
+                                regionOperation = Operator.Add;
+                                operationValue = "(+)";
+                                regionValue = sum;
+                            }
                         }
                         break;
                     case Operator.Mul:
@@ -266,16 +294,29 @@ namespace KENKENNN
             }
 
             textCell[primaryCell.RowIndex][primaryCell.ColumnIndex].Text = $"{regionValue}{operationValue}";
-            
-            // populate region of cells with data.
-            region.RegionValue = regionValue;
-            region.Operation = regionOperation;
 
-            regions.Add(region);
+            //problem.Regions[0, 0] = problem.Regions[0, 1] = problem.Regions[1, 0] = new Region(Operator.Mul, 8);
+            //problem.Regions[0, 2] = problem.Regions[0, 3] = problem.Regions[1, 2] = new Region(Operator.Add, 9);
+            //problem.Regions[1, 1] = problem.Regions[2, 1] = new Region(Operator.Sub, 1);
+            //problem.Regions[1, 3] = problem.Regions[2, 3] = new Region(Operator.Add, 7);
+            //problem.Regions[2, 0] = problem.Regions[3, 0] = new Region(Operator.Mul, 12);
+            //problem.Regions[2, 2] = problem.Regions[3, 2] = new Region(Operator.Mul, 2);
+            //problem.Regions[3, 1] = new Region(Operator.Const, 3);
+            //problem.Regions[3, 3] = new Region(Operator.Const, 1);
+            //return;
+            var region = new Region(regionOperation, regionValue);
+            problem.Regions[primaryCell.RowIndex, primaryCell.ColumnIndex] = region;
+
+            if (neighbourCell1 != null)
+            {
+                problem.Regions[neighbourCell1.RowIndex, neighbourCell1.ColumnIndex] = region;
+            }
+            if (neighbourCell2 != null)
+            {
+                problem.Regions[neighbourCell2.RowIndex, neighbourCell2.ColumnIndex] = region;
+            }
         }
-        #endregion
 
-        #region Event Handlers
         private bool CellIsFree(int rowIndex, int columnIndex)
         {
             return map[rowIndex, columnIndex] == FreeCell;
@@ -297,29 +338,25 @@ namespace KENKENNN
         {
             map[cell.RowIndex, cell.ColumnIndex] = OccupiedCell;
         }
+        #endregion
 
+        #region Event Handlers
         private void Form1_Load(object sender, EventArgs e) {}
 
         // При нажатии на кнопку завершения
         private void CompleteButton_Click(object sender, EventArgs e)
         {
             int f = 0;
-            string[,] answer = new string[MapSize, MapSize];
-
-            for(int i = 0; i < MapSize; i++)
-            {
-                for (int j = 0; j < MapSize; j++)
-                {
-                    answer[i, j] = (textCell[i][j].Text);
-                }
-            }
 
             for (int i = 0; i < MapSize; i++)
             {
                 for (int j = 0; j < MapSize; j++)
                 {
-                    if (answer[i, j] != correct[i, j].ToString())
+                    if (textCell[i][j].Text != correct[i, j].ToString())
+                    {
                         f = 1;
+                        break;
+                    }
                 }
             }
 
@@ -329,7 +366,23 @@ namespace KENKENNN
         //Автоматическое решение
         private void AutoComleteButton_Click(object sender, EventArgs e)
         {
-            
+            var message = "Incorrect!";
+            var res = problem.Solve();
+            if (res != null)
+            {
+                for (int rowIx = 0; rowIx < MapSize; rowIx++)
+                {
+                    for (int colIx = 0; colIx < MapSize; colIx++)
+                    {
+                        var cell = textCell[rowIx][colIx];
+                        cell.Text = res.State[rowIx, colIx].ToString();
+                        cell.Font = new Font(FontFamily.GenericMonospace, 25, FontStyle.Bold);
+                    }
+                }
+                message = "Correct!";
+            }
+
+            MessageBox.Show(message);
         }
         #endregion
     }

@@ -34,11 +34,7 @@ TestResults/
 
 xcuserdata
 
-**/*.designer.cs
-*.designer.cs
-
 # Uncomment if necessary however generally it will be regenerated when needed
 #!packages/repositories.config
 
 .vs/
-*.resx

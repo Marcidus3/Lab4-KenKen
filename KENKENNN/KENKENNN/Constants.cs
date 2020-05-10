@@ -6,7 +6,7 @@ namespace KENKENNN
     public static class Constants
     {
         // размер матрицы
-        public const int MapSize = 4;
+        public const int MapSize = 5;
 
         // Размер одной клетки
         public const int CellSize = 75;
