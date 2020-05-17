@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using static KENKENNN.EnumUtils;
-using System.Runtime.InteropServices;
 
 namespace KENKENNN
 {
@@ -256,7 +255,6 @@ namespace KENKENNN
             {
                 //Если значения в данном регионе складываются
                 case Operator.Add:
-                    
                     //Рассматриваем все возможные решения области
                     AddExplore(null, 0);
                     break;
@@ -298,7 +296,6 @@ namespace KENKENNN
                     MultExplore(null, 1);
                     break;
                 case Operator.Const:
-
                     //Если регион состоит из одной клетки, то туда по правилам записываем уже имеющееся значение    
                     Solutions.Add(new List<int> { Value });
                     break;
@@ -313,7 +310,7 @@ namespace KENKENNN
         //Задание состоит из списка регионов
         List<Region> AllRegions = new List<Region>();
 
-        //Регион из регионов...?
+        // матрица регионов [MapSize x MapSize]
         public Region[,] Regions { get; } =
             new Region[Constants.MapSize, Constants.MapSize];
 
@@ -354,7 +351,6 @@ namespace KENKENNN
             //Берем один регион
             var region = AllRegions[0];
 
-
             //Берем его клетки
             var cells = region.Cells;
 
@@ -383,8 +379,8 @@ namespace KENKENNN
                         return ret;
                 }
 
-            //Если вышло так, что алгоритм не смог найти подходящее решение
-            //То все, что осталось от него на доске, очищаем
+                //Если вышло так, что алгоритм не смог найти подходящее решение
+                //То все, что осталось от него на доске, очищаем
                 foreach (Point p in cells)
                     board.UnsetPlace(p);
             }

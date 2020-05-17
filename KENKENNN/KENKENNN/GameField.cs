@@ -143,7 +143,7 @@ namespace KENKENNN
         private void GetPuzzle()
         {
             fileManager = new fileManager();
-            fileManager.GetData(@"D:\Учеба\Lab4-KenKen-solver2\KENKENNN\KENKENNN\Data\Puzzle.xlsx");
+            fileManager.GetData(@"C:\Users\ruichernob\Desktop\Projects\Lab4-KenKen\KENKENNN\KENKENNN\Data\Puzzle.xlsx");
 
             //В цикле просматриваем таблицу  
             for (int i = 0; i < MapSize ; i++)
@@ -161,7 +161,7 @@ namespace KENKENNN
         private void GetRegions()
         {
             fileManager = new fileManager();
-            fileManager.GetData(@"D:\Учеба\Lab4-KenKen-solver2\KENKENNN\KENKENNN\Data\Regions1.xlsx");
+            fileManager.GetData(@"C:\Users\ruichernob\Desktop\Projects\Lab4-KenKen\KENKENNN\KENKENNN\Data\Regions1.xlsx");
 
             //В цикле просматриваем таблицу  
             for (int i = 0; i < MapSize; i++)
@@ -178,7 +178,7 @@ namespace KENKENNN
         private void GetRegionData()
         {
             fileManager = new fileManager();
-            fileManager.GetData(@"D:\Учеба\Lab4-KenKen-solver2\KENKENNN\KENKENNN\Data\RegionData3.xlsx");
+            fileManager.GetData(@"C:\Users\ruichernob\Desktop\Projects\Lab4-KenKen\KENKENNN\KENKENNN\Data\RegionData3.xlsx");
 
             int value;
             string operat;
@@ -204,48 +204,59 @@ namespace KENKENNN
             GetPuzzle();
             GetRegions();
             GetRegionData();
-            Operator op = Operator.Const ;
-            int value;
-            for (int i = 0; i < MapSize; i++)
+
+            foreach (var regionAbbreviature in RegInf.Keys)
             {
-                for (int j = 0; j < MapSize; j++)
+                var regionInfo = RegInf[regionAbbreviature];
+                var regionOp = Operator.Const;
+                var regionVal = regionInfo.Item2;
+                var regionHint = string.Empty;
+
+                switch (regionInfo.Item1)
                 {
-                    value = RegInf[regionData[i, j]].Item2;
-                    #region
-                    switch ( RegInf[regionData[i, j]].Item1)
+                    case "sum":
+                        regionOp = Operator.Add;
+                        regionHint = "+";
+                        break;
+                    case "sub":
+                        regionOp = Operator.Sub;
+                        regionHint = "-";
+                        break;
+                    case "multi":
+                        regionOp = Operator.Mul;
+                        regionHint = "*";
+                        break;
+                    case "div":
+                        regionHint = "/";
+                        break;
+                    default:
+                        break;
+                }
+
+                var region = new Region(regionOp, regionVal);
+                bool primaryCellHintAdded = false;
+
+                for (int i = 0; i < MapSize; i++)
+                {
+                    for (int j = 0; j < MapSize; j++)
                     {
-                        case "sum":
-                            op = Operator.Add;
-                            textCell[i][j].Text = value.ToString() + " +";
-                            break;
-                        case "sub":
-                            textCell[i][j].Text = value.ToString() + " -";
-                            op = Operator.Sub;
-                            break;
-                        case "multi":
-                            textCell[i][j].Text = value.ToString() + " *";
-                            op = Operator.Mul;
-                            break;
-                        case "div":
-                            op = Operator.Div;
-                            textCell[i][j].Text = value.ToString() + " /";
-                            break;
-                        default:
-                            textCell[i][j].Text = value.ToString();
-                            op = Operator.Const;
-                            break;
+                        if (regionData[i, j] == regionAbbreviature)
+                        {
+                            if (!primaryCellHintAdded)
+                            {
+                                textCell[i][j].Text = $"{regionVal} {regionHint}";
+                                primaryCellHintAdded = true;
+                            }
+
+                            textCell[i][j].BackColor = RegionColors2[regionData[i, j]];
+                            OccupyCell(i, j);
+
+                            problem.Regions[i, j] = region;
+                        }
                     }
-                    #endregion
-                    //Console.Write(op.ToString()+"  ");
-                    textCell[i][j].BackColor = RegionColors2[regionData[i, j]];
-                    AddToReg(op,value,i,j);
-                    OccupyCell(i, j);
-                    
                 }
-             
             }
-        
-                }
+        }
         /*
         private void GetRegions()
         {
@@ -619,8 +630,6 @@ namespace KENKENNN
         //Автоматическое решение
         private void AutoComleteButton_Click(object sender, EventArgs e)
         {
-            var message = "Incorrect!";
-
             var res = problem.Solve();
             //Проходимся по всем решениям
             if (res != null)
@@ -635,10 +644,7 @@ namespace KENKENNN
                         cell.Font = new Font(FontFamily.GenericMonospace, 25, FontStyle.Bold);
                     }
                 }
-               // message = "Correct!";
             }
-
-           // MessageBox.Show(message);
         }
         #endregion
     }

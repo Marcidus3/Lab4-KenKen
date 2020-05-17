@@ -40,7 +40,7 @@
             this.CompleteButton.Name = "CompleteButton";
             this.CompleteButton.Size = new System.Drawing.Size(116, 43);
             this.CompleteButton.TabIndex = 0;
-            this.CompleteButton.Text = "Complete";
+            this.CompleteButton.Text = "Check";
             this.CompleteButton.UseVisualStyleBackColor = true;
             this.CompleteButton.Click += new System.EventHandler(this.CompleteButton_Click);
             // 
